@@ -1,0 +1,241 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
+<div class="content">
+  <div class="page-inner">
+    <h4 class="page-title">Dashboard</h4>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Students per Program</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Programs per College</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="progBarChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Students per College</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="pieChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Organization per College</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="doughnutChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Members per Organization</div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="radarChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</div>
+
+{% block chart %}
+<script>
+  function loadChartData() {
+
+    fetch("/pieChart/")
+      .then((response) => response.json())
+      .then((result_with_college_names) => {
+        var college = Object.keys(result_with_college_names);
+        var counts = Object.values(result_with_college_names);
+        var pieChart = document.getElementById("pieChart").getContext("2d");
+
+        var myPieChart = new Chart(pieChart, {
+          type: 'pie',
+          data: {
+              datasets: [
+                {
+                  data: counts,
+                  borderWidth: 0,
+                },
+              ],
+              labels: college,
+            },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              legend: {
+                position: "bottom",
+              },
+              tooltips: false,
+              layout: {
+                padding: {
+                  left: 20,
+                  right: 20,
+                  top: 20,
+                  bottom: 20,
+                },
+              },
+            },
+        });
+      })
+      .catch((error) => console.error("Error:", error));
+
+    fetch("/barChart/")
+        .then((response) => response.json())
+        .then((result_with_program_names) => {
+          var program = Object.keys(result_with_program_names);
+          var counts = Object.values(result_with_program_names);
+          var barChart = document.getElementById("barChart").getContext("2d");
+          
+        var myBarChart = new Chart(barChart, {
+          type: 'bar',
+          data: {
+            labels: program,
+            datasets: [{
+              label: 'Number of Students',
+              data: counts,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            
+          }
+        });
+      })
+      .catch((error) => console.error("Error:", error));
+
+      fetch("/progBarChart/")
+        .then((response) => response.json())
+        .then((result_with_program_count) => {
+          var program = Object.keys(result_with_program_count);
+          var counts = Object.values(result_with_program_count);
+          var progBarChart = document.getElementById("progBarChart").getContext("2d");
+          
+        var myProgBarChart = new Chart(progBarChart, {
+          type: 'bar',
+          data: {
+            labels: program,
+            datasets: [{
+              label: 'Number of Programs',
+              data: counts,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            
+          }
+        });
+      })
+      .catch((error) => console.error("Error:", error));
+
+    fetch("/doughnutChart/")
+      .then((response) => response.json())
+      .then((result_with_org_count) => {
+        var college = Object.keys(result_with_org_count);
+        var counts = Object.values(result_with_org_count);
+        var doughnutChart = document.getElementById("doughnutChart").getContext("2d");
+
+        var myDoughnutChart = new Chart(doughnutChart, {
+          type: "doughnut",
+          data: {
+            datasets: [
+              {
+                data: counts,
+              }
+            ],
+            labels: college,
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+              padding: {
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: 20,
+              },
+            },
+          },
+        });
+      })
+      .catch((error) => console.error("Error:", error));
+
+      fetch("/radarChart/")
+      .then((response) => response.json())
+      .then((results) => {
+        var org = Object.keys(results);
+        var counts = Object.values(results);
+        var radarChart = document.getElementById("radarChart").getContext("2d");
+
+        var myRadarChart = new Chart(radarChart, {
+          type: "radar",
+          data: {
+            labels: org,
+            datasets: [
+              {
+                label: "Number of Org Members",
+                data: counts,
+                fill: true,
+              }
+            ],
+          },
+          options: {
+            elements: {
+              line: {
+                borderWidth: 1
+              }
+            },
+          },
+        });
+      })
+      .catch((error) => console.error("Error:", error));
+  }
+  loadChartData();
+</script>
+{% endblock %}
+{% endblock %} 
